@@ -1,52 +1,16 @@
-﻿using Business.Services;
-using Data.Models;
-
-namespace UIForms.UI
+﻿namespace UIForms.UI
 {
-    public partial class EditTransactionForm : Form
+    partial class EditTransactionForm
     {
-        private InventoryTransactionService _transactionService;
-        private InventoryTransaction _transaction;
+        private System.ComponentModel.IContainer components = null;
 
-        public EditTransactionForm(InventoryTransactionService transactionService, InventoryTransaction transaction)
+        protected override void Dispose(bool disposing)
         {
-            InitializeComponent();
-            _transactionService = transactionService;
-            _transaction = transaction;
-            cmbType.DataSource = Enum.GetValues(typeof(TransactionType));
-            PopulateFields();
-        }
-
-        private void PopulateFields()
-        {
-            txtItemId.Text = _transaction.InventoryItemId.ToString();
-            txtWarehouseId.Text = _transaction.WarehouseId.ToString();
-            txtQuantity.Text = _transaction.Quantity.ToString();
-            txtCost.Text = _transaction.Cost.ToString();
-            txtSalePrice.Text = _transaction.SalePrice.ToString();
-            txtDate.Text = _transaction.TransactionDate.ToString();
-            cmbType.SelectedItem = _transaction.Type;
-        }
-
-        private void btnSave_Click(object sender, EventArgs e)
-        {
-            try
+            if (disposing && (components != null))
             {
-                _transaction.InventoryItemId = int.Parse(txtItemId.Text);
-                _transaction.WarehouseId = int.Parse(txtWarehouseId.Text);
-                _transaction.Quantity = int.Parse(txtQuantity.Text);
-                _transaction.Cost = decimal.Parse(txtCost.Text);
-                _transaction.SalePrice = decimal.Parse(txtSalePrice.Text);
-                _transaction.TransactionDate = DateTime.Parse(txtDate.Text);
-                _transaction.Type = (TransactionType)cmbType.SelectedItem;
-
-                _transactionService.UpdateTransaction(_transaction);
-                this.Close();
+                components.Dispose();
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error updating transaction: {ex.Message}");
-            }
+            base.Dispose(disposing);
         }
 
         private void InitializeComponent()

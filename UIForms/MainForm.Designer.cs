@@ -1,51 +1,16 @@
-﻿using Business.Services;
-using Data.Models;
-
-namespace UIForms.UI
+﻿namespace UIForms.UI
 {
-    public partial class MainForm : Form
+    partial class MainForm
     {
-        private InventoryTransactionService _transactionService;
+        private System.ComponentModel.IContainer components = null;
 
-        public MainForm()
+        protected override void Dispose(bool disposing)
         {
-            InitializeComponent();
-            _transactionService = new InventoryTransactionService();
-            LoadTransactions();
-        }
-
-        private void LoadTransactions()
-        {
-            var transactions = _transactionService.GetAllTransactions();
-            dataGridViewTransactions.DataSource = transactions;
-        }
-
-        private void btnAdd_Click(object sender, EventArgs e)
-        {
-            var addTransactionForm = new AddTransactionForm(_transactionService);
-            addTransactionForm.ShowDialog();
-            LoadTransactions();
-        }
-
-        private void btnEdit_Click(object sender, EventArgs e)
-        {
-            if (dataGridViewTransactions.SelectedRows.Count > 0)
+            if (disposing && (components != null))
             {
-                var transaction = (InventoryTransaction)dataGridViewTransactions.SelectedRows[0].DataBoundItem;
-                var editTransactionForm = new EditTransactionForm(_transactionService, transaction);
-                editTransactionForm.ShowDialog();
-                LoadTransactions();
+                components.Dispose();
             }
-        }
-
-        private void btnDelete_Click(object sender, EventArgs e)
-        {
-            if (dataGridViewTransactions.SelectedRows.Count > 0)
-            {
-                var transaction = (InventoryTransaction)dataGridViewTransactions.SelectedRows[0].DataBoundItem;
-                _transactionService.DeleteTransaction(transaction.Id);
-                LoadTransactions();
-            }
+            base.Dispose(disposing);
         }
 
         private void InitializeComponent()
@@ -106,6 +71,7 @@ namespace UIForms.UI
             this.Text = "Warehouse Management System";
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewTransactions)).EndInit();
             this.ResumeLayout(false);
+
         }
 
         private System.Windows.Forms.DataGridView dataGridViewTransactions;

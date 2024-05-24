@@ -1,42 +1,16 @@
-﻿using Business.Services;
-using Data.Models;
-
-namespace UIForms.UI
+﻿namespace UIForms.UI
 {
-    public partial class AddTransactionForm : Form
+    partial class AddTransactionForm
     {
-        private InventoryTransactionService _transactionService;
+        private System.ComponentModel.IContainer components = null;
 
-        public AddTransactionForm(InventoryTransactionService transactionService)
+        protected override void Dispose(bool disposing)
         {
-            InitializeComponent();
-            _transactionService = transactionService;
-            // Populate transaction type combo box
-            cmbType.DataSource = Enum.GetValues(typeof(TransactionType));
-        }
-
-        private void btnSave_Click(object sender, EventArgs e)
-        {
-            try
+            if (disposing && (components != null))
             {
-                var transaction = new InventoryTransaction
-                {
-                    InventoryItemId = int.Parse(txtItemId.Text),
-                    WarehouseId = int.Parse(txtWarehouseId.Text),
-                    Quantity = int.Parse(txtQuantity.Text),
-                    Cost = decimal.Parse(txtCost.Text),
-                    SalePrice = decimal.Parse(txtSalePrice.Text),
-                    TransactionDate = DateTime.Parse(txtDate.Text),
-                    Type = (TransactionType)cmbType.SelectedItem
-                };
-
-                _transactionService.AddTransaction(transaction);
-                this.Close();
+                components.Dispose();
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error saving transaction: {ex.Message}");
-            }
+            base.Dispose(disposing);
         }
 
         private void InitializeComponent()
