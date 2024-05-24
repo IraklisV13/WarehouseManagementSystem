@@ -8,6 +8,8 @@
         public int WarehouseId { get; set; }
         public decimal Price { get; set; }
         public int Quantity { get; set; }
+        public int StockLevel { get; set; }
+        public decimal AverageCost { get; set; }
 
         public virtual InventoryItemCategory Category { get; set; }
         public virtual Warehouse Warehouse { get; set; }
