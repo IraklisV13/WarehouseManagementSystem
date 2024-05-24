@@ -1,7 +1,6 @@
 using Business.Services;
 using Data.DBContext;
 using Data.Models;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace UIForms.UI
@@ -9,20 +8,16 @@ namespace UIForms.UI
     public static class Program
     {
         [STAThread]
-        static void Main()
+        public static void Main()
         {
             ApplicationConfiguration.Initialize();
 
             var services = new ServiceCollection();
-            var configuration = LoadConfiguration();
-            ConfigureServices(services, configuration);
+            ConfigureServices(services);
 
             using (var serviceProvider = services.BuildServiceProvider())
             {
                 var dbContext = serviceProvider.GetRequiredService<WarehouseManagementSystemDBContext>();
-
-                // Apply any pending migrations
-                dbContext.Database.Migrate();
 
                 // Add mock data if the database is empty
                 AddMockData(dbContext);
@@ -32,18 +27,9 @@ namespace UIForms.UI
             }
         }
 
-        private static IConfiguration LoadConfiguration()
+        private static void ConfigureServices(ServiceCollection services)
         {
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-            return builder.Build();
-        }
-
-        private static void ConfigureServices(ServiceCollection services, IConfiguration configuration)
-        {
-            services.AddDbContext<WarehouseManagementSystemDBContext>(options =>
-                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+            services.AddScoped<WarehouseManagementSystemDBContext>();
             services.AddScoped<InventoryTransactionService>();
             services.AddScoped<ReportService>();
             services.AddScoped<MainForm>();

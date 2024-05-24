@@ -25,7 +25,7 @@ namespace UIForms.UI
                     Quantity = int.Parse(txtQuantity.Text),
                     Cost = decimal.Parse(txtCost.Text),
                     SalePrice = decimal.Parse(txtSalePrice.Text),
-                    TransactionDate = DateTime.Parse(txtDate.Text),
+                    TransactionDate = DateTime.Parse(dtpDate.Text),
                     TransactionType = (TransactionType)cmbType.SelectedItem
                 };
 
