@@ -1,56 +1,79 @@
 ﻿using Data.DBContext;
 using Data.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Business.Services
 {
     public class InventoryTransactionService
     {
-        private WarehouseManagementSystemDBContext _context;
+        private readonly WarehouseManagementSystemDBContext _dbContext;
 
-        public InventoryTransactionService()
+        public InventoryTransactionService(WarehouseManagementSystemDBContext dbContext)
         {
-            _context = new WarehouseManagementSystemDBContext();
+            _dbContext = dbContext;
         }
 
         public List<InventoryTransaction> GetAllTransactions()
         {
-            return _context.InventoryTransactions.Include("InventoryItem").Include("Warehouse").ToList();
-        }
-
-        public InventoryTransaction GetTransactionById(int id)
-        {
-            return _context.InventoryTransactions.Include("InventoryItem").Include("Warehouse").FirstOrDefault(t => t.Id == id);
+            return _dbContext.InventoryTransactions.Include(t => t.InventoryItem).ToList();
         }
 
         public void AddTransaction(InventoryTransaction transaction)
         {
-            _context.InventoryTransactions.Add(transaction);
-            _context.SaveChanges();
+            if (transaction.TransactionType.ToString() == "Incoming")
+            {
+                // Update stock level
+                transaction.InventoryItem.StockLevel += transaction.Quantity;
+
+                // Update moving average cost
+                UpdateMovingAverageCost(transaction.InventoryItemId, transaction.Quantity, transaction.SalePrice);
+            }
+            else if (transaction.TransactionType.ToString() == "Outgoing")
+            {
+                // Update stock level
+                transaction.InventoryItem.StockLevel -= transaction.Quantity;
+            }
+
+            _dbContext.InventoryTransactions.Add(transaction);
+            _dbContext.SaveChanges();
         }
 
         public void UpdateTransaction(InventoryTransaction transaction)
         {
-            var existingTransaction = _context.InventoryTransactions.Find(transaction.Id);
-            if (existingTransaction != null)
-            {
-                existingTransaction.InventoryItemId = transaction.InventoryItemId;
-                existingTransaction.WarehouseId = transaction.WarehouseId;
-                existingTransaction.Quantity = transaction.Quantity;
-                existingTransaction.Cost = transaction.Cost;
-                existingTransaction.SalePrice = transaction.SalePrice;
-                existingTransaction.TransactionDate = transaction.TransactionDate;
-                existingTransaction.Type = transaction.Type;
-                _context.SaveChanges();
-            }
+            _dbContext.Entry(transaction).State = (System.Data.Entity.EntityState)EntityState.Modified;
+            _dbContext.SaveChanges();
         }
 
         public void DeleteTransaction(int id)
         {
-            var transaction = _context.InventoryTransactions.Find(id);
+            var transaction = _dbContext.InventoryTransactions.Find(id);
             if (transaction != null)
             {
-                _context.InventoryTransactions.Remove(transaction);
-                _context.SaveChanges();
+                if (transaction.TransactionType.ToString() == "Incoming")
+                {
+                    transaction.InventoryItem.StockLevel -= transaction.Quantity;
+                }
+                else if (transaction.TransactionType.ToString() == "Outgoing")
+                {
+                    transaction.InventoryItem.StockLevel += transaction.Quantity;
+                }
+
+                _dbContext.InventoryTransactions.Remove(transaction);
+                _dbContext.SaveChanges();
+            }
+        }
+
+        private void UpdateMovingAverageCost(int itemId, int quantity, decimal cost)
+        {
+            var item = _dbContext.InventoryItems.Find(itemId);
+            if (item != null)
+            {
+                var totalCost = item.StockLevel * item.AverageCost;
+                totalCost += quantity * cost;
+                item.StockLevel += quantity;
+                item.AverageCost = totalCost / item.StockLevel;
+
+                _dbContext.SaveChanges();
             }
         }
     }
